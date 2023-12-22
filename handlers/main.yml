@@ -1,0 +1,10 @@
+---
+- name: Start Vector service
+  become: true
+  ansible.builtin.service:
+    name: vector
+    state: restarted
+  register: vector_service
+  until: vector_service.status.ActiveState == 'active'
+  retries: 10
+  delay: 20

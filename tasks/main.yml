@@ -1,0 +1,69 @@
+---
+- name: Make Vector temp directory
+  ansible.builtin.file:
+    path: '/tmp/vector'
+    state: directory
+    mode: '0755'
+- name: Download Vector
+  become: true
+  ansible.builtin.get_url:
+    url: https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-x86_64-unknown-linux-musl.tar.gz
+    dest: '/tmp/vector'
+    mode: '0755'
+- name: Unarchive package
+  become: true
+  ansible.builtin.unarchive:
+    src: '/tmp/vector/vector-{{ vector_version }}-x86_64-unknown-linux-musl.tar.gz'
+    dest: '/tmp/vector'
+    remote_src: true
+    mode: '0755'
+    extra_opts:
+      - --strip-components=2
+- name: Create Vector system user
+  become: true
+  ansible.builtin.user:
+    name: vector
+    system: true
+- name: Install Vector
+  become: true
+  ansible.builtin.copy:
+    src: '/tmp/vector/bin/vector'
+    dest: '/usr/bin/vector'
+    remote_src: true
+    mode: '0755'
+- name: Make Vector data directory
+  become: true
+  ansible.builtin.file:
+    path: '/var/lib/vector'
+    state: directory
+    mode: '0755'
+    owner: 'vector'
+    group: 'vector'
+- name: Make Vector config directory
+  become: true
+  ansible.builtin.file:
+    path: '/etc/vector'
+    state: directory
+    mode: '0755'
+    owner: 'vector'
+    group: 'vector'
+- name: Configure vector
+  become: true
+  ansible.builtin.template:
+    src: templates/vector-config.j2
+    dest: '/etc/vector/vector.yaml'
+    mode: '0755'
+- name: Create Vector service
+  become: true
+  ansible.builtin.copy:
+    src: '/tmp/vector/etc/systemd/vector.service'
+    dest: '/etc/systemd/system'
+    mode: '0755'
+    remote_src: true
+- name: Reload Daemon
+  become: true
+  ansible.builtin.systemd_service:
+    name: vector
+    daemon_reload: true
+    state: restarted
+  notify: Start Vector service
