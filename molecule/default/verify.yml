@@ -1,0 +1,55 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  vars:
+    vector_service: 'vector.service'
+    vector_service_file: '/tmp/vector/etc/systemd/vector.service''
+    vector_user: 'vector'
+    vector_group: 'vector'
+    vector_config_file: '/etc/vector/vector.yaml'
+  tasks:
+    - name: 'Gather Local Users'
+      ansible.builtin.getent:
+        database: passwd
+      become: true
+
+    - name: 'Assert Vector User'
+      ansible.builtin.assert:
+        that:
+          - "'{{ vector_user }}' in getent_passwd"
+
+    - name: 'Gather Local Groups'
+      ansible.builtin.getent:
+        database: group
+      become: true
+
+    - name: 'Assert Vector User Group'
+      ansible.builtin.assert:
+        that:
+          - "'{{ vector_group }}' in getent_group"
+
+    - name: 'Gather Vector Config File Stats'
+      ansible.builtin.stat:
+        path: "{{ vector_config_file }}"
+      become: true
+      register: vector_config_file_stat
+
+    - name: 'Assert Vector Paths Stats'
+      ansible.builtin.assert:
+        that:
+          - "'{{ vector_user }}' == '{{ vector_config_file_stat.stat.pw_name }}'"
+          - "'{{ vector_group }}' == '{{ vector_config_file_stat.stat.gr_name }}'"
+          - "'0755' == '{{ vector_config_file_stat.stat.mode }}'"
+          - "{{ vector_config_file_stat.stat.exists }}"
+
+    - name: 'Gather Local Services'
+      ansible.builtin.service_facts:
+      become: true
+
+    - name: 'Assert Vector Service'
+      ansible.builtin.assert:
+        that:
+          - "'{{ vector_service }}' in ansible_facts.services"
+          - "'running' == ansible_facts.services[vector_service].state"
+          - "'enabled' == ansible_facts.services[vector_service].status"

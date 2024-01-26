@@ -1,4 +1,6 @@
 galaxy_info:
+  role_name: vector_role
+  namespace: zakamaldin_andrey
   author: Zakamaldin Andrey
   description: This role can install vector service
   company: netology

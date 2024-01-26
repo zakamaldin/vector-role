@@ -3,7 +3,7 @@
   become: true
   ansible.builtin.service:
     name: vector
-    state: restarted
+    state: started
   register: vector_service
   until: vector_service.status.ActiveState == 'active'
   retries: 10
