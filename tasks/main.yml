@@ -53,6 +53,8 @@
     src: templates/vector-config.j2
     dest: '/etc/vector/vector.yaml'
     mode: '0755'
+    owner: 'vector'
+    group: 'vector'
 - name: Create Vector service
   become: true
   ansible.builtin.copy:
@@ -65,5 +67,6 @@
   ansible.builtin.systemd_service:
     name: vector
     daemon_reload: true
-    state: restarted
+    state: started
+    enabled: true
   notify: Start Vector service
