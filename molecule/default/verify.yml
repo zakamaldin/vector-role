@@ -4,10 +4,11 @@
   gather_facts: false
   vars:
     vector_service: 'vector.service'
-    vector_service_file: '/tmp/vector/etc/systemd/vector.service''
+    vector_service_file: '/tmp/vector/etc/systemd/vector.service'
     vector_user: 'vector'
     vector_group: 'vector'
     vector_config_file: '/etc/vector/vector.yaml'
+    vector_service_mode: '0755'
   tasks:
     - name: 'Gather Local Users'
       ansible.builtin.getent:
@@ -38,10 +39,10 @@
     - name: 'Assert Vector Paths Stats'
       ansible.builtin.assert:
         that:
-          - "'{{ vector_user }}' == '{{ vector_config_file_stat.stat.pw_name }}'"
-          - "'{{ vector_group }}' == '{{ vector_config_file_stat.stat.gr_name }}'"
-          - "'0755' == '{{ vector_config_file_stat.stat.mode }}'"
-          - "{{ vector_config_file_stat.stat.exists }}"
+          - vector_config_file_stat.stat.mode == vector_service_mode
+          - vector_config_file_stat.stat.pw_name == vector_user
+          - vector_config_file_stat.stat.gr_name == vector_group
+          - vector_config_file_stat.stat.exists == true
 
     - name: 'Gather Local Services'
       ansible.builtin.service_facts:
