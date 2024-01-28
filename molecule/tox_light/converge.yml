@@ -1,0 +1,8 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: ""
+      ansible.builtin.debug:
+        msg: "Testing python code with tox"
