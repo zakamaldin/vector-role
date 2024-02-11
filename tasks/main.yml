@@ -7,13 +7,17 @@
 - name: Download Vector
   become: true
   ansible.builtin.get_url:
-    url: https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-x86_64-unknown-linux-musl.tar.gz
+    url:
+      "https://packages.timber.io/vector/{{ vector_version }}/\
+      vector-{{ vector_version }}-x86_64-unknown-linux-musl.tar.gz"
     dest: '/tmp/vector'
     mode: '0755'
 - name: Unarchive package
   become: true
   ansible.builtin.unarchive:
-    src: '/tmp/vector/vector-{{ vector_version }}-x86_64-unknown-linux-musl.tar.gz'
+    src:
+      "/tmp/vector/\
+      vector-{{ vector_version }}-x86_64-unknown-linux-musl.tar.gz"
     dest: '/tmp/vector'
     remote_src: true
     mode: '0755'
@@ -64,7 +68,7 @@
     remote_src: true
 - name: Reload Daemon
   become: true
-  ansible.builtin.systemd_service:
+  ansible.builtin.systemd:
     name: vector
     daemon_reload: true
     state: started
